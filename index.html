@@ -67,17 +67,17 @@
     .song-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid var(--item-border); cursor: pointer; font-size: 16px; }
     .song-item:active { background: var(--item-border); }
 
-    /* ミニプレイヤーをスリムに調整 */
-    #miniPlayer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); width: 100%; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 5px 20px 5px; box-sizing: border-box; z-index: 10; display: none; transition: background 0.3s; }
+    /* ミニプレイヤー：さらにスリムに */
+    #miniPlayer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); width: 100%; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 2px 20px 2px; box-sizing: border-box; z-index: 10; display: none; transition: background 0.3s; }
 
-    .controls { display: flex; justify-content: space-around; margin-top: 5px; align-items: center; }
-    .controls button { padding: 0; background: var(--bg-color); color: var(--accent-color); border: none; border-radius: 5px; width: 40px; height: 40px; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; opacity: 0.5; overflow: hidden; }
-    .controls button.play-pause-btn { opacity: 1; width: 48px; height: 48px; }
+    .controls { display: flex; justify-content: space-around; margin-top: 2px; align-items: center; }
+    .controls button { padding: 0; background: var(--bg-color); color: var(--accent-color); border: none; border-radius: 5px; width: 35px; height: 35px; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; opacity: 0.5; overflow: hidden; }
+    .controls button.play-pause-btn { opacity: 1; width: 40px; height: 40px; }
     .controls button.active-btn { background: var(--accent-color); color: var(--bg-color); opacity: 1; }
-    .controls button svg { width: 32px; height: 32px; }
-    .controls button.play-pause-btn svg { width: 40px; height: 40px; }
+    .controls button svg { width: 28px; height: 28px; }
+    .controls button.play-pause-btn svg { width: 32px; height: 32px; }
     
-    input[type=range] { width: 100%; margin-top: 5px; }
+    input[type=range] { width: 100%; margin-top: 2px; }
 
     #player .player-container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
     .artwork-container { width: 256px; height: 256px; margin: 0 auto 10px; border-radius: 12px; overflow: hidden; background: var(--item-border); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -233,7 +233,7 @@
       <div class="color-picker" id="colorPicker"></div>
     </div>
 
-    <div class="version">ver1.14.8</div>
+    <div class="version">ver1.14.9</div>
   </div>
 
   <div id="deleteScreen" class="screen">
@@ -249,11 +249,11 @@
 
   <div id="miniPlayer">
     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-      <div id="nowPlaying" style="font-weight: bold; font-size: 15px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">曲が選択されていません</div>
-      <div id="timeDisplay" style="font-size: 12px; color: var(--secondary-text); text-align: right; margin-bottom: 5px;">0:00 / 0:00</div>
+      <div id="nowPlaying" style="font-weight: bold; font-size: 15px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">曲が選択されていません</div>
+      <div id="timeDisplay" style="font-size: 12px; color: var(--secondary-text); text-align: right; margin-bottom: 2px;">0:00 / 0:00</div>
     </div>
-    <input type="range" id="progressBar" value="0" step="0.1" style="margin-top:0;">
-    <div class="controls" style="margin-top: 20px;">
+    <input type="range" id="progressBar" value="0" step="0.1">
+    <div class="controls">
       <button id="playPauseBtn" class="play-pause-btn"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg></button>
       <button id="shuffleBtn"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
       <button id="repeatBtn"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button>
