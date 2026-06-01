@@ -36,8 +36,7 @@
     .screen { display: none; padding: 0 20px 220px 20px; height: 100vh; overflow-y: auto; box-sizing: border-box; }
     .screen.active { display: block; }
     
-    /* プレイヤー画面のヘッダーを下げて隙間を調整 */
-    #player { padding-top: 10px; overflow: hidden; }
+    #player { padding-top: 40px; overflow: hidden; }
     
     .header-bar { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; padding-bottom: 15px; margin-bottom: 10px; }
     
@@ -68,8 +67,8 @@
     .song-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid var(--item-border); cursor: pointer; font-size: 16px; }
     .song-item:active { background: var(--item-border); }
 
-    /* ミニプレイヤーのパディングを調整してバーを下げた */
-    #miniPlayer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); width: 100%; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 15px 20px 25px; box-sizing: border-box; z-index: 10; display: none; transition: background 0.3s; }
+    /* ミニプレイヤーをスリムに調整 */
+    #miniPlayer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); width: 100%; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 5px 20px 5px; box-sizing: border-box; z-index: 10; display: none; transition: background 0.3s; }
 
     .controls { display: flex; justify-content: space-around; margin-top: 5px; align-items: center; }
     .controls button { padding: 0; background: var(--bg-color); color: var(--accent-color); border: none; border-radius: 5px; width: 40px; height: 40px; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; opacity: 0.5; overflow: hidden; }
@@ -78,7 +77,7 @@
     .controls button svg { width: 32px; height: 32px; }
     .controls button.play-pause-btn svg { width: 40px; height: 40px; }
     
-    input[type=range] { width: 100%; margin-top: 10px; }
+    input[type=range] { width: 100%; margin-top: 5px; }
 
     #player .player-container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
     .artwork-container { width: 256px; height: 256px; margin: 0 auto 10px; border-radius: 12px; overflow: hidden; background: var(--item-border); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -234,7 +233,7 @@
       <div class="color-picker" id="colorPicker"></div>
     </div>
 
-    <div class="version">ver1.14.7</div>
+    <div class="version">ver1.14.8</div>
   </div>
 
   <div id="deleteScreen" class="screen">
