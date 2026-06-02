@@ -21,6 +21,10 @@
       --btn-bg: #eeeeee;
       --accent-color: #fa233b;
       --secondary-text: #888888;
+      --overlay-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.05));
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --art-shadow: none;
     }
     body.dark-mode {
       --bg-color: #000000;
@@ -30,9 +34,27 @@
       --item-border: #2c2c2e;
       --btn-bg: #2c2c2e;
       --secondary-text: #aaaaaa;
+      --overlay-bg: linear-gradient(135deg, rgba(40, 40, 40, 0.5), rgba(0, 0, 0, 0.1));
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --art-shadow: none;
     }
-    body { margin: 0; font-family: sans-serif; background: var(--bg-color); color: var(--text-color); transition: background 0.3s, color 0.3s; }
+    body { margin: 0; font-family: sans-serif; background: var(--bg-color); color: var(--text-color); transition: background 0.3s, color 0.3s; position: relative; min-height: 100vh; }
     
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 50% 20%, var(--accent-color) 0%, transparent 80%);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: -1;
+      transition: background 0.3s, opacity 0.3s;
+    }
+    body.dark-mode::before {
+      opacity: 0.25;
+    }
+
     .screen { display: none; padding: 0 20px 220px 20px; height: 100vh; overflow-y: auto; box-sizing: border-box; }
     .screen.active { display: block; }
     
@@ -45,13 +67,16 @@
       position: -webkit-sticky;
       position: sticky;
       top: 0;
-      background: var(--bg-color);
+      background: var(--overlay-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       z-index: 5;
       margin-left: -20px;
       margin-right: -20px;
       padding-left: 20px;
       padding-right: 20px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
     }
     
     .header-bar h2 { margin: 0; }
@@ -59,7 +84,7 @@
     .icon-btn:active { color: var(--accent-color); }
     .back-btn { color: var(--accent-color); padding-left: 0; margin-right: 15px; }
 
-    .tab-bar { position: fixed; bottom: 0; width: 100%; height: calc(60px + env(safe-area-inset-bottom)); background: var(--tab-bg); display: flex; border-top: 1px solid var(--border-color); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; transition: background 0.3s; z-index: 20; }
+    .tab-bar { position: fixed; bottom: 0; width: 100%; height: calc(60px + env(safe-area-inset-bottom)); background: var(--overlay-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; border-top: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; transition: background 0.3s; z-index: 20; }
     .tab { flex: 1; text-align: center; cursor: pointer; color: var(--secondary-text); transition: color 0.3s; display: flex; justify-content: center; align-items: center; }
     .tab.active { color: var(--accent-color); }
     .tab svg { width: 28px; height: 28px; }
@@ -67,11 +92,10 @@
     .song-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid var(--item-border); cursor: pointer; font-size: 16px; }
     .song-item:active { background: var(--item-border); }
 
-    /* ミニプレイヤー：さらにスリムに */
-    #miniPlayer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); width: 100%; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 10px 20px 2px; box-sizing: border-box; z-index: 10; display: none; transition: background 0.3s; }
+    #miniPlayer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); width: 100%; background: var(--overlay-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); padding: 10px 20px 2px; box-sizing: border-box; z-index: 10; display: none; transition: background 0.3s; }
 
     .controls { display: flex; justify-content: space-around; margin-top: 2px; align-items: center; }
-    .controls button { padding: 0; background: var(--bg-color); color: var(--accent-color); border: none; border-radius: 5px; width: 35px; height: 35px; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; opacity: 0.5; overflow: hidden; }
+    .controls button { padding: 0; background: transparent; color: var(--accent-color); border: none; border-radius: 5px; width: 35px; height: 35px; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; justify-content: center; align-items: center; opacity: 0.5; overflow: hidden; }
     .controls button.play-pause-btn { opacity: 1; width: 40px; height: 40px; }
     .controls button.active-btn { background: var(--accent-color); color: var(--bg-color); opacity: 1; }
     .controls button svg { width: 28px; height: 28px; }
@@ -80,7 +104,7 @@
     input[type=range] { width: 100%; margin-top: 2px; }
 
     #player .player-container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
-    .artwork-container { width: 256px; height: 256px; margin: 0 auto 10px; border-radius: 12px; overflow: hidden; background: var(--item-border); display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .artwork-container { width: 256px; height: 256px; margin: 0 auto 10px; border-radius: 12px; overflow: hidden; background: var(--item-border); display: flex; justify-content: center; align-items: center; box-shadow: var(--art-shadow); transition: box-shadow 0.3s; }
     #artworkImage { width: 100%; height: 100%; object-fit: cover; display: none; }
     #artworkFallback { color: var(--border-color); display: flex; justify-content: center; align-items: center; }
     #artworkFallback svg { width: 120px; height: 120px; }
@@ -233,7 +257,7 @@
       <div class="color-picker" id="colorPicker"></div>
     </div>
 
-    <div class="version">ver1.14.9</div>
+    <div class="version">ver1.15.6</div>
   </div>
 
   <div id="deleteScreen" class="screen">
