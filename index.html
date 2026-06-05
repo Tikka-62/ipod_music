@@ -343,7 +343,7 @@
       <div class="color-picker" id="colorPicker"></div>
     </div>
 
-    <div class="version">ver2.5.0</div>
+    <div class="version">ver2.6.0</div>
   </div>
 
   <div id="deleteScreen" class="screen">
@@ -400,6 +400,7 @@
     var miniPlayer = document.getElementById('miniPlayer');
     var nowPlaying = document.getElementById('nowPlaying');
     var currentAudioUrl = null;
+    window.isAudioLoading = false;
 
     var colors = ['#fa233b', '#ff9500', '#ffcc00', '#34c759', '#5ac8fa', '#007aff', '#af52de', '#ff2d55'];
     var colorPicker = document.getElementById('colorPicker');
@@ -718,27 +719,33 @@
               }
             }
             
-            for (var j = 0; j < zipEntries.length; j++) {
-              var entry = zipEntries[j];
-              statusMsg.textContent = 'ZIP展開＆保存中: ' + (j + 1) + ' / ' + zipEntries.length + ' 曲';
-              var arrayBuffer = await entry.async("arraybuffer");
-              var type = 'audio/mpeg';
-              var cleanName = entry.name.split('/').pop().replace(/\.[^/.]+$/, "");
+            var BATCH_SIZE = 10;
+            for (var j = 0; j < zipEntries.length; j += BATCH_SIZE) {
+              var endIdx = Math.min(j + BATCH_SIZE, zipEntries.length);
+              statusMsg.textContent = 'ZIP展開＆保存中: ' + endIdx + ' / ' + zipEntries.length + ' 曲';
               
-              if (!cleanName.startsWith('._')) {
-                var tempBlob = new Blob([arrayBuffer], { type: type });
-                var tags = await extractTags(tempBlob);
-                tempBlob = null;
+              for (var k = j; k < endIdx; k++) {
+                var entry = zipEntries[k];
+                var arrayBuffer = await entry.async("arraybuffer");
+                var type = 'audio/mpeg';
+                var cleanName = entry.name.split('/').pop().replace(/\.[^/.]+$/, "");
                 
-                await saveToDB({
-                  name: cleanName,
-                  type: type,
-                  data: arrayBuffer,
-                  artwork: tags.artwork,
-                  tags: []
-                });
+                if (!cleanName.startsWith('._')) {
+                  var tempBlob = new Blob([arrayBuffer], { type: type });
+                  var tags = await extractTags(tempBlob);
+                  tempBlob = null;
+                  
+                  await saveToDB({
+                    name: cleanName,
+                    type: type,
+                    data: arrayBuffer,
+                    artwork: tags.artwork,
+                    tags: []
+                  });
+                }
+                arrayBuffer = null;
               }
-              arrayBuffer = null;
+              await new Promise(function(resolve) { setTimeout(resolve, 150); });
             }
           } catch(err) {}
           processedCount++;
@@ -762,6 +769,10 @@
             fileReader.readAsArrayBuffer(file);
           });
           processedCount++;
+          
+          if (processedCount % 10 === 0) {
+            await new Promise(function(resolve) { setTimeout(resolve, 150); });
+          }
         }
       }
 
