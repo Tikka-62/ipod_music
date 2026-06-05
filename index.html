@@ -56,6 +56,20 @@
       display: none;
     }
 
+    #loadingSpinner {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      border: 4px solid var(--item-border);
+      border-top: 4px solid var(--accent-color);
+      border-radius: 50%; width: 50px; height: 50px;
+      animation: spin 1s linear infinite;
+      display: none; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    body.dark-mode #loadingSpinner {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
     .screen { display: none; padding: 0 20px 220px 20px; height: 100vh; overflow-y: auto; box-sizing: border-box; }
     .screen.active { display: block; }
     
@@ -199,6 +213,8 @@
 </head>
 <body>
   
+  <div id="loadingSpinner"></div>
+
   <div id="library" class="screen active">
     <div class="header-bar">
       <h2>ライブラリ</h2>
@@ -306,12 +322,20 @@
       </label>
     </div>
 
+    <div class="setting-row">
+      <span>高画質ジャケ写 (次回から)</span>
+      <label class="switch">
+        <input type="checkbox" id="highResToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <div style="margin-top: 25px;">
       <span>テーマカラー</span>
       <div class="color-picker" id="colorPicker"></div>
     </div>
 
-    <div class="version">ver2.3.0</div>
+    <div class="version">ver2.4.1</div>
   </div>
 
   <div id="deleteScreen" class="screen">
@@ -367,14 +391,17 @@
     var miniPlayer = document.getElementById('miniPlayer');
     var nowPlaying = document.getElementById('nowPlaying');
     var currentAudioUrl = null;
+    window.isAudioLoading = false;
 
     var colors = ['#fa233b', '#ff9500', '#ffcc00', '#34c759', '#5ac8fa', '#007aff', '#af52de', '#ff2d55'];
     var colorPicker = document.getElementById('colorPicker');
     var savedTheme = localStorage.getItem('theme');
     var savedColor = localStorage.getItem('accentColor');
     var savedBgEffect = localStorage.getItem('bgEffect');
+    var savedHighRes = localStorage.getItem('highResArtwork');
     var appTags = JSON.parse(localStorage.getItem('appTags')) || ['朝', '読書'];
     
+    var isHighRes = savedHighRes === 'on';
     var artworkCache = {};
     var artworkCacheQueue = [];
     var MAX_ARTWORK_CACHE = 10;
@@ -397,6 +424,9 @@
       bgEffectToggle.checked = true;
     }
 
+    var highResToggle = document.getElementById('highResToggle');
+    highResToggle.checked = isHighRes;
+
     document.getElementById('darkModeToggle').addEventListener('change', function(e) {
       if (e.target.checked) {
         document.body.classList.add('dark-mode');
@@ -415,6 +445,11 @@
         document.body.classList.add('effect-off');
         localStorage.setItem('bgEffect', 'off');
       }
+    });
+
+    highResToggle.addEventListener('change', function(e) {
+      isHighRes = e.target.checked;
+      localStorage.setItem('highResArtwork', isHighRes ? 'on' : 'off');
     });
 
     colors.forEach(function(color) {
@@ -583,7 +618,7 @@
         var img = new Image();
         img.onload = function() {
           var canvas = document.createElement('canvas');
-          var MAX_SIZE = 300;
+          var MAX_SIZE = isHighRes ? 600 : 300;
           var width = img.width;
           var height = img.height;
 
@@ -603,7 +638,8 @@
           canvas.height = height;
           var ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          var quality = isHighRes ? 0.9 : 0.8;
+          var dataUrl = canvas.toDataURL('image/jpeg', quality);
           URL.revokeObjectURL(url);
           resolve(dataUrl);
         };
@@ -993,18 +1029,22 @@
       var idx = 0;
       function next() {
         if (idx >= currentSongs.length) return;
+        if (window.isAudioLoading) {
+          setTimeout(next, 500);
+          return;
+        }
         var songMeta = currentSongs[idx];
         if (artworkCache[songMeta.id] === undefined) {
           getArtwork(songMeta, function() {
             idx++;
-            setTimeout(next, 50);
+            setTimeout(next, 300);
           });
         } else {
           idx++;
           next();
         }
       }
-      next();
+      setTimeout(next, 2000);
     }
 
     function loadCardArtwork(songMeta, cardEl) {
@@ -1123,22 +1163,44 @@
       resetCardPositions();
       updatePlayerTags();
 
+      document.getElementById('loadingSpinner').style.display = 'block';
+      window.isAudioLoading = true;
+
       var transaction = db.transaction(["songs"], "readonly");
       var store = transaction.objectStore("songs");
       var request = store.get(songMeta.id);
       
       request.onsuccess = function(e) {
         var song = e.target.result;
-        if(!song) return;
+        if(!song) {
+          document.getElementById('loadingSpinner').style.display = 'none';
+          window.isAudioLoading = false;
+          return;
+        }
         var blob = new Blob([song.data], { type: song.type });
         if(currentAudioUrl) {
           URL.revokeObjectURL(currentAudioUrl);
         }
         currentAudioUrl = URL.createObjectURL(blob);
         audioPlayer.src = currentAudioUrl;
-        audioPlayer.play();
-        updatePlayPauseIcon(true);
-        switchTab(null, 'player');
+
+        var playPromise = audioPlayer.play();
+        if (playPromise !== undefined) {
+          playPromise.then(function() {
+            finishLoad();
+          }).catch(function(error) {
+            finishLoad();
+          });
+        } else {
+          finishLoad();
+        }
+
+        function finishLoad() {
+          document.getElementById('loadingSpinner').style.display = 'none';
+          window.isAudioLoading = false;
+          updatePlayPauseIcon(true);
+          switchTab(null, 'player');
+        }
       };
     }
 
